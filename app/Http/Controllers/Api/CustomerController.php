@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use JsonException;
-use function MongoDB\BSON\toJSON;
 
 class CustomerController extends Controller
 {

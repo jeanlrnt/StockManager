@@ -14,6 +14,7 @@ class Customer extends Model
 
     protected $table = 'customer';
     protected $with = ['address'];
+    protected $hidden = ['address_id', 'created_at', 'updated_at', 'deleted_at'];
 
     protected $fillable = [
         'id',

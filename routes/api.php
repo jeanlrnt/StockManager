@@ -14,14 +14,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
-    Route::prefix('customers')->group(function () {
-        Route::get('/', 'App\Http\Controllers\Api\CustomerController@index');
-        Route::get('/{customer}', 'App\Http\Controllers\Api\CustomerController@show');
-        Route::post('/', 'App\Http\Controllers\Api\CustomerController@store');
-    });
+Route::get('/user', function (Request $request) {
+    return $request->user();
+});
+Route::prefix('customers')->name('customers.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\Api\CustomerController@index')->name('index');
+    Route::get('/{customer}', 'App\Http\Controllers\Api\CustomerController@show')->name('show');
+    Route::post('/', 'App\Http\Controllers\Api\CustomerController@store')->name('store');
+    Route::put('/{customer}', 'App\Http\Controllers\Api\CustomerController@update')->name('update');
 });
 

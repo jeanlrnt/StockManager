@@ -22,5 +22,6 @@ Route::prefix('customers')->name('customers.')->group(function () {
     Route::get('/{customer}', 'App\Http\Controllers\Api\CustomerController@show')->name('show');
     Route::post('/', 'App\Http\Controllers\Api\CustomerController@store')->name('store');
     Route::put('/{customer}', 'App\Http\Controllers\Api\CustomerController@update')->name('update');
+    Route::delete('/{customer}', 'App\Http\Controllers\Api\CustomerController@destroy')->name('destroy');
 });
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Customer;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -15,7 +14,7 @@ class storeCustomerRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', Customer::class);
+        return true;
     }
 
     /**

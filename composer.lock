@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "077a243c509898fa9693d920e6d67968",
+    "content-hash": "3762e3e49086bb12b7b121de9f03695f",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -2739,6 +2739,87 @@
                 "source": "https://github.com/nikic/PHP-Parser/tree/v4.16.0"
             },
             "time": "2023-06-25T14:52:30+00:00"
+        },
+        {
+            "name": "notihnio/php-multipart-form-data-parser",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/notihnio/php-multipart-form-data-parser.git",
+                "reference": "78be265f45804401e14dd4cd76479957fbda2058"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/notihnio/php-multipart-form-data-parser/zipball/78be265f45804401e14dd4cd76479957fbda2058",
+                "reference": "78be265f45804401e14dd4cd76479957fbda2058",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Notihnio\\MultipartFormDataParser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Notis Mastrandrikos",
+                    "email": "pmastrandrikos@gmail.com"
+                }
+            ],
+            "description": "The missing php functionality to support put, patch, delete, etc multipart requests handling",
+            "support": {
+                "issues": "https://github.com/notihnio/php-multipart-form-data-parser/issues",
+                "source": "https://github.com/notihnio/php-multipart-form-data-parser/tree/1.0.0"
+            },
+            "time": "2019-03-10T13:10:12+00:00"
+        },
+        {
+            "name": "notihnio/php-request-parser",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/notihnio/php-request-parser.git",
+                "reference": "b318c3d2e4376b8f7a5740a1891cf94a3b677f2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/notihnio/php-request-parser/zipball/b318c3d2e4376b8f7a5740a1891cf94a3b677f2a",
+                "reference": "b318c3d2e4376b8f7a5740a1891cf94a3b677f2a",
+                "shasum": ""
+            },
+            "require": {
+                "notihnio/php-multipart-form-data-parser": "1.0.0",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Notihnio\\RequestParser\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Notis Mastrandrikos",
+                    "email": "pmastrandrikos@gmail.com"
+                }
+            ],
+            "description": "The missing php functionality to support put, patch, delete, etc.. requests handling",
+            "support": {
+                "issues": "https://github.com/notihnio/php-request-parser/issues",
+                "source": "https://github.com/notihnio/php-request-parser/tree/1.0.0"
+            },
+            "time": "2019-03-10T13:44:00+00:00"
         },
         {
             "name": "nunomaduro/termwind",

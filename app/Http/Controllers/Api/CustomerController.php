@@ -25,7 +25,8 @@ class CustomerController extends Controller
      */
     public function index(Request $request): string
     {
-        $user = Auth::user();
+        $user = $request->user();
+
         // If the user is not logged in, or if the user is not authorized to view customers, return a 403 (Forbidden)
         if (!$user || $user->cannot('viewAny', Customer::class)) {
             return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)

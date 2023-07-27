@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -11,6 +12,8 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
+        $address = Address::factory()->create();
+
         return [
             'id' => $this->faker->uuid(),
             'first_name' => $this->faker->firstName(),
@@ -18,7 +21,7 @@ class CustomerFactory extends Factory
             'company_name' => $this->faker->company(),
             'email' => $this->faker->email(),
             'phone' => $this->faker->phoneNumber(),
-            'address_id' => $this->faker->uuid(),
+            'address_id' => $address->id,
         ];
     }
 }

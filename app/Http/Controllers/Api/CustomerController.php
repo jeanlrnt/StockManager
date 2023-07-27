@@ -29,11 +29,7 @@ class CustomerController extends Controller
 
         // If the user is not logged in, or if the user is not authorized to view customers, return a 403 (Forbidden)
         if (!$user || $user->cannot('viewAny', Customer::class)) {
-            return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+            abort(403);
         }
 
         // Define the default take and page
@@ -95,11 +91,7 @@ class CustomerController extends Controller
         $user = Auth::user();
         // If the user is not logged in, or if the user is not authorized to create a customer, return a 403 (Forbidden)
         if (!$user || $user->cannot('create', Customer::class)) {
-            return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'POST')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+            abort(403);
         }
 
         // Create the customer with the parameters from the request if they exist or with null values
@@ -142,7 +134,8 @@ class CustomerController extends Controller
             'data' => $data->toArray(),
             'rendered_elements' => 1,
         ];
-        return response(json_encode($content, JSON_THROW_ON_ERROR), 201)
+
+        return response(json_encode($content, JSON_THROW_ON_ERROR), 200)
             ->header('Content-type', 'application/json')
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', 'POST')
@@ -159,22 +152,13 @@ class CustomerController extends Controller
     {
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
-        // If the user is not logged in, or if the user is not authorized to view the customer, return a 403 (Forbidden)
-        if (!$user || $user->cannot('view', $realCustomer)) {
-            return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
-        }
-
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            return response(json_encode(['message' => 'Ressource not found.'], JSON_THROW_ON_ERROR), 404)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'GET')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+            abort(404);
+        }
+        // If the user is not logged in, or if the user is not authorized to view the customer, return a 403 (Forbidden)
+        if (!$user || $user->cannot('view', $realCustomer)) {
+            abort(403);
         }
 
         $content = [
@@ -198,26 +182,18 @@ class CustomerController extends Controller
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
 
-        // If the user is not logged in, or if the user is not authorized to update the customer, return a 403 (Forbidden)
-        if (!$user || $user->cannot('update', $realCustomer)) {
-            return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'PUT')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
-        }
-
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            return response(json_encode(['message' => 'Ressource not found.'], JSON_THROW_ON_ERROR), 404)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'PUT')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+            abort(404);
+        }
+        // If the user is not logged in, or if the user is not authorized to update the customer, return a 403 (Forbidden)
+        if (!$user || $user->cannot('update', $realCustomer)) {
+            abort(403);
         }
 
         // Parse the request parameters and put them in an object
         $parameters = (object)MultipartFormDataParser::parse()->params;
+
 
         // Update the customer with the parameters from the request if they exist or with the customer's current values
         $realCustomer->update([
@@ -286,22 +262,14 @@ class CustomerController extends Controller
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
 
-        // If the user is not logged in, or if the user is not authorized to delete the customer, return a 403 (Forbidden)
-        if (!$user || $user->cannot('delete', $realCustomer)) {
-            return response(json_encode(['message' => 'Unauthorized action.'], JSON_THROW_ON_ERROR), 403)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'DELETE')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
-        }
-
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            return response(json_encode(['message' => 'Ressource not found.'], JSON_THROW_ON_ERROR), 404)
-                ->header('Content-type', 'application/json')
-                ->header('Access-Control-Allow-Origin', '*')
-                ->header('Access-Control-Allow-Methods', 'DELETE')
-                ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+            abort(404);
+        }
+
+        // If the user is not logged in, or if the user is not authorized to delete the customer, return a 403 (Forbidden)
+        if (!$user || $user->cannot('delete', $realCustomer)) {
+            abort(403);
         }
 
         // Delete the customer and return a 204 (No content) if the deletion was successful

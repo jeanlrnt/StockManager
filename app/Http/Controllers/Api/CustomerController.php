@@ -191,8 +191,12 @@ class CustomerController extends Controller
             abort(403);
         }
 
-        // Parse the request parameters and put them in an object
-        $parameters = (object)MultipartFormDataParser::parse()->params;
+        // If the request is a multipart/form-data request, parse the parameters from the request
+        if ($request->all() === []) {
+            $parameters = (object)MultipartFormDataParser::parse()->params;
+        } else {
+            $parameters = (object)$request->all();
+        }
 
 
         // Update the customer with the parameters from the request if they exist or with the customer's current values

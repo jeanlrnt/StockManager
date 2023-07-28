@@ -120,30 +120,30 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-//    public function test_update_returns_200_status_code_when_user_is_authorized(): void
-//    {
-//        Sanctum::actingAs(
-//            User::factory()->create(),
-//            ['update']
-//        );
-//
-//        $customer = Customer::factory()->create();
-//
-//        $response = $this->put('/api/customers/' . $customer->id, [
-//            'first_name' => fake()->firstName(),
-//            'last_name' => fake()->lastName(),
-//            'email' => fake()->email(),
-//            'company_name' => fake()->company(),
-//            'phone' => fake()->phoneNumber(),
-//            'address[street]' => fake()->streetAddress(),
-//            'address[street_complement]' => fake()->streetSuffix(),
-//            'address[city]' => fake()->city(),
-//            'address[zip_code]' => fake()->postcode(),
-//            'address[country]' => fake()->country(),
-//        ]);
-//
-//        $response->assertStatus(200);
-//    }
+    public function test_update_returns_200_status_code_when_user_is_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['update']
+        );
+
+        $customer = Customer::factory()->create();
+
+        $response = $this->put('/api/customers/' . $customer->id, [
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'email' => fake()->email(),
+            'company_name' => fake()->company(),
+            'phone' => fake()->phoneNumber(),
+            'address[street]' => fake()->streetAddress(),
+            'address[street_complement]' => fake()->streetSuffix(),
+            'address[city]' => fake()->city(),
+            'address[zip_code]' => fake()->postcode(),
+            'address[country]' => fake()->country(),
+        ]);
+
+        $response->assertStatus(200);
+    }
 
     public function test_update_returns_403_status_code_when_user_is_not_authorized(): void
     {
@@ -207,4 +207,29 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(202);
     }
 
+    public function test_destroy_returns_403_status_code_when_user_is_not_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['missing-permission']
+        );
+
+        $customer = Customer::factory()->create();
+
+        $response = $this->delete('/api/customers/' . $customer->id);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_destroy_returns_404_status_code_when_customer_does_not_exist(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['delete']
+        );
+
+        $response = $this->delete('/api/customers/1');
+
+        $response->assertStatus(404);
+    }
 }

@@ -35,7 +35,7 @@ jobs:
     - name: Install front-end dependencies
       run: |
         npm install
-        npm run dev
+        LARAVEL_BYPASS_ENV_CHECK=1 npm run dev
  
     - name: Run Testsuite
       run: vendor/bin/phpunit tests/

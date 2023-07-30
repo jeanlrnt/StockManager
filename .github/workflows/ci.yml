@@ -1,4 +1,4 @@
-name: StockManager
+name: tests
 
 on: push
 
@@ -7,7 +7,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container: kirschbaumdevelopment/laravel-test-runner:8.2
-    
+
     services:
       mysql:
         image: mysql:5.7
@@ -17,25 +17,30 @@ jobs:
         ports:
           - 33306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
- 
+
 
     steps:
-    - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
-    - name: Install composer dependencies
-      run: |
-        composer install --no-scripts
- 
-    - name: Prepare Laravel Application
-      run: |
-        cp .env.ci .env
-        php artisan key:generate
-        
-    - name: Install front-end dependencies
-      run: |
-        npm install
-        LARAVEL_BYPASS_ENV_CHECK=1 npm run build
- 
-    - name: Run Testsuite
-      run: vendor/bin/phpunit tests/
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+
+      - name: Install additional PHP extensions
+        run: |
+          sudo apt-get install -y php-http
+
+      - name: Install composer dependencies
+        run: |
+          composer install --no-scripts
+
+      - name: Prepare Laravel Application
+        run: |
+          cp .env.ci .env
+          php artisan key:generate
+
+      - name: Install front-end dependencies
+        run: |
+          npm install
+          LARAVEL_BYPASS_ENV_CHECK=1 npm run build
+
+      - name: Run Testsuite
+        run: vendor/bin/phpunit tests/

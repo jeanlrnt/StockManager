@@ -16,8 +16,7 @@
         "laravel/telescope": "^4.15",
         "laravel/tinker": "^2.8",
         "livewire/livewire": "^2.11",
-        "notihnio/php-request-parser": "^1.0",
-        "ext-http": "*"
+        "notihnio/php-request-parser": "^1.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-latest",

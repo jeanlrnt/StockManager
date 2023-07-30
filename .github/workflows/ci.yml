@@ -24,10 +24,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install additional PHP extensions
-        run: |
-          apt-get install -y php-http php-raphf
-
       - name: Install composer dependencies
         run: |
           composer install --no-scripts

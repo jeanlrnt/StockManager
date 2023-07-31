@@ -10,14 +10,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('customer', function (Blueprint $table) {
+        Schema::create('articles', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('company_name')->nullable();
-            $table->string('email');
-            $table->string('phone')->nullable();
+            $table->string('title');
+            $table->string('slug')->unique();
+            $table->foreignUuid('provider')
+                ->references('id')->on('providers')
+                ->cascadeOnUpdate()->cascadeOnDelete();
             $table->timestamps();
+            $table->archivedAt();
             $table->softDeletes();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer');
+        Schema::dropIfExists('articles');
     }
 };

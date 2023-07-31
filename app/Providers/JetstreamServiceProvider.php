@@ -39,6 +39,8 @@ class JetstreamServiceProvider extends ServiceProvider
             'viewAny',
             'update',
             'delete',
+            'restore',
+            'force-delete',
         ]);
     }
 }

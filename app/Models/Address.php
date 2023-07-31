@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Address extends Model
 {
@@ -25,12 +25,11 @@ class Address extends Model
     ];
 
     /**
-     * An address belongs to a customer
-     *
-     * @return BelongsTo
+     * Get the owning addressable model.
      */
-    public function customer(): BelongsTo
+    public function addressable(): MorphTo
     {
-        return $this->belongsTo(Customer::class, 'address_id', 'id');
+        return $this->morphTo();
     }
+
 }

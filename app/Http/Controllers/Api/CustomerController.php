@@ -7,35 +7,37 @@ use App\Http\Requests\storeCustomerRequest;
 use App\Http\Requests\updateCustomerRequest;
 use App\Models\Address;
 use App\Models\Customer;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use JsonException;
 use Notihnio\MultipartFormDataParser\MultipartFormDataParser;
+use Symfony\Component\HttpFoundation\Response;
 
 class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
-     * @throws JsonException
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function index(Request $request): string
+    public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         // If the user is not logged in, or if the user is not authorized to view customers, return a 403 (Forbidden)
         if (!$user || $user->cannot('viewAny', Customer::class)) {
-            abort(403);
+            return response()->json([
+                'message' => 'You are not authorized to view customers.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         // Define the default take and page
         $page = config('config.default.page');
         $take = config('config.default.take');
         $total_count = Customer::count();
+
 
         // If the request has a take, and it's an integer, and it's greater than 1, set the take
         if ($request->has('take') && (int)$request->take && $request->take >= 1) {
@@ -62,6 +64,12 @@ class CustomerController extends Controller
 
         $offset = ($page - 1) * $take;
 
+        if ($total_count === 0) {
+            return response()->json([
+                'message' => 'No customers found.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
         $data = Customer::skip($offset)->take($take)->get();
 
         $content = [
@@ -69,29 +77,31 @@ class CustomerController extends Controller
             'total_elements' => $total_count,
             'total_pages' => $total_pages,
             'rendered_elements' => $data->count(),
-            'page' => $page,
-            'take' => $take,
+            'page' => (int)$page,
+            'take' => (int)$take,
             'previous_page' => $page > 1 ? ($request->url() . '?page=' . ($page - 1) . '&take=' . $take) : null,
             'next_page' => $page < $total_pages ? ($request->url() . '?page=' . ($page + 1) . '&take=' . $take) : null,
         ];
 
-        return response(json_encode($content, JSON_THROW_ON_ERROR), 200)
-            ->header('Content-type', 'application/json')
+        return response()->json($content, Response::HTTP_OK)
             ->header('Access-Control-Allow-Origin', '*')
-            ->header('Access-Control-Allow-Methods', 'GET')
+            ->header('Access-Control-Allow-Methods', 'POST')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 
     /**
      * Store a newly created resource in storage.
-     * @throws JsonException
+     * @param storeCustomerRequest $request
+     * @return JsonResponse
      */
-    public function store(storeCustomerRequest $request): string
+    public function store(storeCustomerRequest $request): JsonResponse
     {
         $user = Auth::user();
         // If the user is not logged in, or if the user is not authorized to create a customer, return a 403 (Forbidden)
         if (!$user || $user->cannot('create', Customer::class)) {
-            abort(403);
+            return response()->json([
+                'message' => 'You are not authorized to create a customer'
+            ], Response::HTTP_FORBIDDEN);
         }
 
         // Create the customer with the parameters from the request if they exist or with null values
@@ -121,11 +131,11 @@ class CustomerController extends Controller
                 'city' => $request->address['city'] ?? null,
                 'zip_code' => $request->address['zip_code'] ?? null,
                 'country' => $request->address['country'] ?? null,
+                'addressable_id' => $customer->id,
+                'addressable_type' => Customer::class,
             ]);
 
-            // Link the address to the customer
-            $customer->address_id = $address->id;
-            $customer->save();
+            $customer->address()->save($address);
         }
 
         // Get the created customer from the database and return it as JSON if the creation was successful (201)
@@ -135,8 +145,7 @@ class CustomerController extends Controller
             'rendered_elements' => 1,
         ];
 
-        return response(json_encode($content, JSON_THROW_ON_ERROR), 200)
-            ->header('Content-type', 'application/json')
+        return response()->json($content, Response::HTTP_CREATED)
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', 'POST')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
@@ -145,20 +154,23 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      * @param string $customer
-     * @return string
-     * @throws JsonException
+     * @return JsonResponse
      */
-    public function show(string $customer): string
+    public function show(string $customer): JsonResponse
     {
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            abort(404);
+            return response()->json([
+                'message' => 'The customer was not found',
+            ], Response::HTTP_NOT_FOUND);
         }
         // If the user is not logged in, or if the user is not authorized to view the customer, return a 403 (Forbidden)
         if (!$user || $user->cannot('view', $realCustomer)) {
-            abort(403);
+            return response()->json([
+                'message' => 'You are not authorized to view this customer',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $content = [
@@ -166,34 +178,39 @@ class CustomerController extends Controller
             'rendered_elements' => 1,
         ];
 
-        return response(json_encode($content, JSON_THROW_ON_ERROR), 200)
-            ->header('Content-type', 'application/json')
+        return response()->json($content, Response::HTTP_OK)
             ->header('Access-Control-Allow-Origin', '*')
-            ->header('Access-Control-Allow-Methods', 'GET')
+            ->header('Access-Control-Allow-Methods', 'POST')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 
     /**
      * Update the specified resource in storage.
-     * @throws JsonException
+     * @param updateCustomerRequest $request
+     * @param string $customer
+     * @return JsonResponse
      */
-    public function update(updateCustomerRequest $request, string $customer): string
+    public function update(updateCustomerRequest $request, string $customer): JsonResponse
     {
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
 
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            abort(404);
+            return response()->json([
+                'message' => 'The customer you are trying to update does not exist.',
+            ], Response::HTTP_NOT_FOUND);
         }
         // If the user is not logged in, or if the user is not authorized to update the customer, return a 403 (Forbidden)
         if (!$user || $user->cannot('update', $realCustomer)) {
-            abort(403);
+            return response()->json([
+                'message' => 'You are not authorized to update this customer.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         // If the request is a multipart/form-data request, parse the parameters from the request
         if ($request->all() === []) {
-            $parameters = (object)MultipartFormDataParser::parse()->params;
+            $parameters = (object)MultipartFormDataParser::parse()?->params;
         } else {
             $parameters = (object)$request->all();
         }
@@ -230,15 +247,19 @@ class CustomerController extends Controller
             ]);
 
             // Create the address if it doesn't exist, or update it if it does exist and link it to the customer in both cases
-            Address::updateOrCreate(['id' => $realCustomer->address_id],
+            $address = Address::updateOrCreate(['id' => $realCustomer->address?->id],
                 [
-                    'id' => $realCustomer->address_id ?? Str::uuid(),
-                    'street' => $parameters->address['street'] ?? $realCustomer->address->street,
-                    'street_complement' => $parameters->address['street_complement'] ?? $realCustomer->address->street_complement,
-                    'city' => $parameters->address['city'] ?? $realCustomer->address->city,
-                    'zip_code' => $parameters->address['zip_code'] ?? $realCustomer->address->zip_code,
-                    'country' => $parameters->address['country'] ?? $realCustomer->address->country,
+                    'id' => $realCustomer->address?->id ?? Str::uuid(),
+                    'street' => $parameters->address['street'] ?? $realCustomer->address?->street,
+                    'street_complement' => $parameters->address['street_complement'] ?? $realCustomer->address?->street_complement,
+                    'city' => $parameters->address['city'] ?? $realCustomer->address?->city,
+                    'zip_code' => $parameters->address['zip_code'] ?? $realCustomer->address?->zip_code,
+                    'country' => $parameters->address['country'] ?? $realCustomer->address?->country,
+                    'addressable_id' => $realCustomer->id,
+                    'addressable_type' => Customer::class,
                 ]);
+
+            $realCustomer->address()->save($address);
         }
 
         // Get the updated customer from the database and return it as JSON if the update was successful (202)
@@ -248,40 +269,108 @@ class CustomerController extends Controller
             'rendered_elements' => 1,
         ];
 
-        return response(json_encode($content, JSON_THROW_ON_ERROR), 202)
-            ->header('Content-type', 'application/json')
+        return response()->json($content, Response::HTTP_ACCEPTED)
             ->header('Access-Control-Allow-Origin', '*')
-            ->header('Access-Control-Allow-Methods', 'PUT')
+            ->header('Access-Control-Allow-Methods', 'POST')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 
     /**
      * Remove the specified resource from storage.
      * @param string $customer
-     * @return Application|\Illuminate\Foundation\Application|Response|ResponseFactory
-     * @throws JsonException
+     * @return JsonResponse
      */
-    public function destroy(string $customer)
+    public function destroy(string $customer): JsonResponse
     {
         $user = Auth::user();
         $realCustomer = Customer::find($customer);
 
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
-            abort(404);
+            return response()->json([
+                'message' => 'The customer you are trying to delete does not exist.',
+            ], Response::HTTP_NOT_FOUND);
         }
 
         // If the user is not logged in, or if the user is not authorized to delete the customer, return a 403 (Forbidden)
         if (!$user || $user->cannot('delete', $realCustomer)) {
-            abort(403);
+            return response()->json([
+                'message' => 'You are not authorized to delete this customer.',
+            ], Response::HTTP_FORBIDDEN);
         }
 
         // Delete the customer and return a 204 (No content) if the deletion was successful
         $realCustomer->delete();
 
         // Return a 202 if the deletion was successful (Accepted)
-        return response(json_encode(['message' => 'Ressource successfully deleted.'], JSON_THROW_ON_ERROR), 202)
-            ->header('Content-type', 'application/json')
+        return response()->json([
+            'message' => 'Ressource successfully deleted.',
+        ], Response::HTTP_ACCEPTED)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'DELETE')
+            ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+    }
+
+    public function restore(string $customer): JsonResponse
+    {
+        $user = Auth::user();
+        $realCustomer = Customer::onlyTrashed()->find($customer);
+
+        // If the customer doesn't exist, return a 404 (Not found)
+        if (!$realCustomer) {
+            return response()->json([
+                'message' => 'The customer you are trying to restore does not exist in the trash.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // If the user is not logged in, or if the user is not authorized to restore the customer, return a 403 (Forbidden)
+        if (!$user || $user->cannot('restore', $realCustomer)) {
+            return response()->json([
+                'message' => 'You are not authorized to restore this customer.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // Restore the customer and return a 202 (Accepted) if the restoration was successful
+        $realCustomer->restore();
+
+        $content = [
+            'data' => $realCustomer->toArray(),
+            'rendered_elements' => 1,
+            'message' => 'Ressource successfully restored.',
+        ];
+
+        return response()->json($content, Response::HTTP_ACCEPTED)
+            ->header('Access-Control-Allow-Origin', '*')
+            ->header('Access-Control-Allow-Methods', 'POST')
+            ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
+    }
+
+    public function forceDelete(string $customer): JsonResponse
+    {
+        $user = Auth::user();
+        $realCustomer = Customer::onlyTrashed()->find($customer);
+
+        // If the customer doesn't exist, return a 404 (Not found)
+        if (!$realCustomer) {
+            return response()->json([
+                'message' => 'The customer you are trying to delete does not exist in the trash.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // If the user is not logged in, or if the user is not authorized to delete the customer, return a 403 (Forbidden)
+        if (!$user || $user->cannot('forceDelete', $realCustomer)) {
+            return response()->json([
+                'message' => 'You are not authorized to force-delete this customer.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        // Delete the customer and return a 202 (No content) if the deletion was successful
+        $realCustomer->forceDelete();
+
+        // Return a 202 if the deletion was successful (Accepted)
+        return response()->json([
+            'message' => 'Ressource successfully force deleted.',
+        ], Response::HTTP_ACCEPTED)
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', 'DELETE')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');

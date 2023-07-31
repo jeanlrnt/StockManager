@@ -40,7 +40,6 @@ class ApiMiddleware
 
         $response = $next($request);
 
-
         if (!$response instanceof JsonResponse) {
             $response = $this->factory->json(
                 $response->content(),

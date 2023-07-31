@@ -60,6 +60,6 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        return $user->tokenCan('forceDelete');
+        return $user->tokenCan('force-delete');
     }
 }

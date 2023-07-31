@@ -23,5 +23,7 @@ Route::prefix('customers')->name('customers.')->group(function () {
     Route::post('/', 'App\Http\Controllers\Api\CustomerController@store')->name('store');
     Route::put('/{customer}', 'App\Http\Controllers\Api\CustomerController@update')->name('update');
     Route::delete('/{customer}', 'App\Http\Controllers\Api\CustomerController@destroy')->name('destroy');
+    Route::delete('/{customer}/force-delete', 'App\Http\Controllers\Api\CustomerController@forceDelete')->name('force-delete');
+    Route::post('/{customer}/restore', 'App\Http\Controllers\Api\CustomerController@restore')->name('restore');
 });
 

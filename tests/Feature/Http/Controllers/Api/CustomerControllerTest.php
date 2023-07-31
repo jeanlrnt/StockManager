@@ -17,9 +17,25 @@ class CustomerControllerTest extends TestCase
             ['viewAny']
         );
 
+        Customer::factory()->count(60)->create();
+
         $response = $this->get('/api/customers');
 
         $response->assertStatus(200);
+    }
+
+    public function test_index_returns_404_status_code_when_user_is_authorized_and_there_are_no_customers(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['viewAny']
+        );
+
+        Customer::all()->each->delete();
+
+        $response = $this->get('/api/customers');
+
+        $response->assertStatus(404);
     }
 
     public function test_index_returns_403_status_code_when_user_is_not_authorized(): void
@@ -74,7 +90,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(404);
     }
 
-    public function test_store_returns_200_status_code_when_user_is_authorized(): void
+    public function test_store_returns_201_status_code_when_user_is_authorized(): void
     {
         Sanctum::actingAs(
             User::factory()->create(),
@@ -94,7 +110,7 @@ class CustomerControllerTest extends TestCase
             'address[country]' => fake()->country(),
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(201);
     }
 
     public function test_store_returns_403_status_code_when_user_is_not_authorized(): void
@@ -120,7 +136,7 @@ class CustomerControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    public function test_update_returns_200_status_code_when_user_is_authorized(): void
+    public function test_update_returns_202_status_code_when_user_is_authorized(): void
     {
         Sanctum::actingAs(
             User::factory()->create(),
@@ -142,7 +158,7 @@ class CustomerControllerTest extends TestCase
             'address[country]' => fake()->country(),
         ]);
 
-        $response->assertStatus(200);
+        $response->assertStatus(202);
     }
 
     public function test_update_returns_403_status_code_when_user_is_not_authorized(): void
@@ -229,6 +245,122 @@ class CustomerControllerTest extends TestCase
         );
 
         $response = $this->delete('/api/customers/1');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_restore_returns_202_status_code_when_user_is_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['restore']
+        );
+
+        $customer = Customer::factory()->create([
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->post('/api/customers/' . $customer->id . '/restore');
+
+        $response->assertStatus(202);
+    }
+
+    public function test_restore_returns_403_status_code_when_user_is_not_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['missing-permission']
+        );
+
+        $customer = Customer::factory()->create([
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->post('/api/customers/' . $customer->id . '/restore');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_restore_returns_404_status_code_when_customer_does_not_exist(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['restore']
+        );
+
+        $response = $this->post('/api/customers/1/restore');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_restore_returns_404_status_code_when_customer_is_not_deleted(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['restore']
+        );
+
+        $customer = Customer::factory()->create();
+
+        $response = $this->post('/api/customers/' . $customer->id . '/restore');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_force_delete_returns_202_status_code_when_user_is_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['force-delete']
+        );
+
+        $customer = Customer::factory()->create([
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->delete('/api/customers/' . $customer->id . '/force-delete');
+
+        $response->assertStatus(202);
+    }
+
+    public function test_force_delete_returns_403_status_code_when_user_is_not_authorized(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['missing-permission']
+        );
+
+        $customer = Customer::factory()->create([
+            'deleted_at' => now(),
+        ]);
+
+        $response = $this->delete('/api/customers/' . $customer->id . '/force-delete');
+
+        $response->assertStatus(403);
+    }
+
+    public function test_force_delete_returns_404_status_code_when_customer_does_not_exist(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['force-delete']
+        );
+
+        $response = $this->delete('/api/customers/1/force-delete');
+
+        $response->assertStatus(404);
+    }
+
+    public function test_force_delete_returns_404_status_code_when_customer_is_not_deleted(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['force-delete']
+        );
+
+        $customer = Customer::factory()->create();
+
+        $response = $this->delete('/api/customers/' . $customer->id . '/force-delete');
 
         $response->assertStatus(404);
     }

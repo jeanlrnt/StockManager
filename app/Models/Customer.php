@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Concerns\HasTimestamps;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use HasFactory, HasUuids, HasTimestamps;
+    use HasFactory, HasUuids, HasTimestamps, SoftDeletes;
 
     protected $table = 'customer';
     protected $with = ['address'];
@@ -28,10 +29,10 @@ class Customer extends Model
 
     /**
      * A customer has one address
-     * @return HasOne
+     * @return MorphOne
      */
-    public function address(): HasOne
+    public function address(): MorphOne
     {
-        return $this->hasOne(Address::class, 'id', 'address_id');
+        return $this->morphOne(Address::class, 'addressable');
     }
 }

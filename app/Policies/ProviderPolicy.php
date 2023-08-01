@@ -60,6 +60,6 @@ class ProviderPolicy
      */
     public function forceDelete(User $user, Provider $provider): bool
     {
-        return $user->tokenCan('forceDelete');
+        return $user->tokenCan('force-delete');
     }
 }

@@ -33,44 +33,13 @@ class CustomerController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        // Define the default take and page
-        $page = config('config.default.page');
-        $take = config('config.default.take');
-        $total_count = Customer::count();
+        [$data, $total_count, $total_pages, $page, $take] = paginate(Customer::all(), $request);
 
-
-        // If the request has a take, and it's an integer, and it's greater than 1, set the take
-        if ($request->has('take') && (int)$request->take && $request->take >= 1) {
-
-            // If the take is greater than the total_count, set it to the total_count
-            if ($request->take > $total_count) {
-                $take = $total_count;
-            } else {
-                $take = $request->take;
-            }
-        }
-
-        $total_pages = ceil($total_count / $take);
-
-        // If the request has a page, and it's an integer, and it's greater than 1, set the page
-        if ($request->has('page') && (int)$request->page && $request->page >= 1) {
-            $page = $request->page;
-
-            // If the page is too high, return the last page
-            if ($page > $total_pages) {
-                $page = $total_pages;
-            }
-        }
-
-        $offset = ($page - 1) * $take;
-
-        if ($total_count === 0) {
+        if ($data->isEmpty()) {
             return response()->json([
                 'message' => 'No customers found.',
             ], Response::HTTP_NOT_FOUND);
         }
-
-        $data = Customer::skip($offset)->take($take)->get();
 
         $content = [
             'data' => $data->toArray(),
@@ -81,6 +50,7 @@ class CustomerController extends Controller
             'take' => (int)$take,
             'previous_page' => $page > 1 ? ($request->url() . '?page=' . ($page - 1) . '&take=' . $take) : null,
             'next_page' => $page < $total_pages ? ($request->url() . '?page=' . ($page + 1) . '&take=' . $take) : null,
+            'message' => 'Customers retrieved successfully',
         ];
 
         return response()->json($content, Response::HTTP_OK)
@@ -143,6 +113,7 @@ class CustomerController extends Controller
         $content = [
             'data' => $data->toArray(),
             'rendered_elements' => 1,
+            'message' => 'Customer created successfully',
         ];
 
         return response()->json($content, Response::HTTP_CREATED)
@@ -176,6 +147,7 @@ class CustomerController extends Controller
         $content = [
             'data' => $realCustomer->toArray(),
             'rendered_elements' => 1,
+            'message' => 'Customer retrieved successfully',
         ];
 
         return response()->json($content, Response::HTTP_OK)
@@ -228,8 +200,7 @@ class CustomerController extends Controller
         // Parse the address parameters from the request and put them in an array to be validated
         $address = [];
         foreach ($parameters as $key => $parameter) {
-            if (preg_match('/^address\[(.*)]$/', $key)) {
-                preg_match('/^address\[(.*)]$/', $key, $matches);
+            if (preg_match('/^address\[(.*)\]$/', $key, $matches)) {
                 $address[$matches[1]] = $parameter;
                 unset($parameters->$key);
             }
@@ -238,7 +209,7 @@ class CustomerController extends Controller
 
         if ($address) {
             // Validate the address parameters if they exist
-            Validator::validate($parameters->address, [
+            $validated_address = Validator::validate($parameters->address, [
                 'street' => 'nullable|string',
                 'street_complement' => 'nullable|string',
                 'city' => 'nullable|string',
@@ -246,20 +217,13 @@ class CustomerController extends Controller
                 'country' => 'nullable|string',
             ]);
 
-            // Create the address if it doesn't exist, or update it if it does exist and link it to the customer in both cases
-            $address = Address::updateOrCreate(['id' => $realCustomer->address?->id],
-                [
-                    'id' => $realCustomer->address?->id ?? Str::uuid(),
-                    'street' => $parameters->address['street'] ?? $realCustomer->address?->street,
-                    'street_complement' => $parameters->address['street_complement'] ?? $realCustomer->address?->street_complement,
-                    'city' => $parameters->address['city'] ?? $realCustomer->address?->city,
-                    'zip_code' => $parameters->address['zip_code'] ?? $realCustomer->address?->zip_code,
-                    'country' => $parameters->address['country'] ?? $realCustomer->address?->country,
-                    'addressable_id' => $realCustomer->id,
-                    'addressable_type' => Customer::class,
-                ]);
-
-            $realCustomer->address()->save($address);
+            // If the customer doesn't have an address, create it and link it to the customer
+            if (!$realCustomer->address) {
+                $realCustomer->address()->create($validated_address);
+            } else {
+                // If the customer already has an address, update it with the validated address parameters
+                $realCustomer->address->update($validated_address);
+            }
         }
 
         // Get the updated customer from the database and return it as JSON if the update was successful (202)
@@ -267,6 +231,7 @@ class CustomerController extends Controller
         $content = [
             'data' => $data->toArray(),
             'rendered_elements' => 1,
+            'message' => 'Customer updated successfully',
         ];
 
         return response()->json($content, Response::HTTP_ACCEPTED)
@@ -304,13 +269,18 @@ class CustomerController extends Controller
 
         // Return a 202 if the deletion was successful (Accepted)
         return response()->json([
-            'message' => 'Ressource successfully deleted.',
+            'message' => 'Customer successfully deleted.',
         ], Response::HTTP_ACCEPTED)
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', 'DELETE')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 
+    /**
+     * Restore the specified resource from storage.
+     * @param string $customer
+     * @return JsonResponse
+     */
     public function restore(string $customer): JsonResponse
     {
         $user = Auth::user();
@@ -319,7 +289,7 @@ class CustomerController extends Controller
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
             return response()->json([
-                'message' => 'The customer you are trying to restore does not exist in the trash.',
+                'message' => 'The customer was not found in the trash.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -336,7 +306,7 @@ class CustomerController extends Controller
         $content = [
             'data' => $realCustomer->toArray(),
             'rendered_elements' => 1,
-            'message' => 'Ressource successfully restored.',
+            'message' => 'Customer successfully restored.',
         ];
 
         return response()->json($content, Response::HTTP_ACCEPTED)
@@ -345,6 +315,11 @@ class CustomerController extends Controller
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 
+    /**
+     * Permanently remove the specified resource from storage.
+     * @param string $customer
+     * @return JsonResponse
+     */
     public function forceDelete(string $customer): JsonResponse
     {
         $user = Auth::user();
@@ -353,7 +328,7 @@ class CustomerController extends Controller
         // If the customer doesn't exist, return a 404 (Not found)
         if (!$realCustomer) {
             return response()->json([
-                'message' => 'The customer you are trying to delete does not exist in the trash.',
+                'message' => 'The customer was not found in the trash.',
             ], Response::HTTP_NOT_FOUND);
         }
 
@@ -369,7 +344,7 @@ class CustomerController extends Controller
 
         // Return a 202 if the deletion was successful (Accepted)
         return response()->json([
-            'message' => 'Ressource successfully force deleted.',
+            'message' => 'Customer successfully force deleted.',
         ], Response::HTTP_ACCEPTED)
             ->header('Access-Control-Allow-Origin', '*')
             ->header('Access-Control-Allow-Methods', 'DELETE')

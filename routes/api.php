@@ -27,3 +27,13 @@ Route::prefix('customers')->name('customers.')->group(function () {
     Route::post('/{customer}/restore', 'App\Http\Controllers\Api\CustomerController@restore')->name('restore');
 });
 
+Route::prefix('providers')->name('providers.')->group(function (){
+    Route::get('/', 'App\Http\Controllers\Api\ProviderController@index')->name('index');
+    Route::get('/{provider}', 'App\Http\Controllers\Api\ProviderController@show')->name('show');
+    Route::post('/', 'App\Http\Controllers\Api\ProviderController@store')->name('store');
+    Route::put('/{provider}', 'App\Http\Controllers\Api\ProviderController@update')->name('update');
+    Route::delete('/{provider}', 'App\Http\Controllers\Api\ProviderController@destroy')->name('destroy');
+    Route::delete('/{provider}/force-delete', 'App\Http\Controllers\Api\ProviderController@forceDelete')->name('force-delete');
+    Route::post('/{provider}/restore', 'App\Http\Controllers\Api\ProviderController@restore')->name('restore');
+});
+

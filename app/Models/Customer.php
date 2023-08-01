@@ -15,16 +15,14 @@ class Customer extends Model
 
     protected $table = 'customer';
     protected $with = ['address'];
-    protected $hidden = ['address_id', 'created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
     protected $fillable = [
-        'id',
         'first_name',
         'last_name',
         'company_name',
         'email',
         'phone',
-        'address_id',
     ];
 
     /**

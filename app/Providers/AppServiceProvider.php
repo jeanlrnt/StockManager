@@ -19,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        require_once resource_path('helpers/paginate_helpers.php');
     }
 }

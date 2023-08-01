@@ -60,3 +60,73 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## Installation
+
+### Clone the repository
+
+```bash
+git clone https://github.com/jeanlrnt/StockManager.git
+```
+
+### Switch to the repo folder
+
+```bash
+cd StockManager
+```
+
+### Install all the dependencies using composer
+
+```bash
+composer install
+```
+
+### Copy the example env file and make the required configuration changes in the .env file
+
+```bash
+cp .env.example .env
+```
+
+### Run laravel sail
+
+```bash
+./vendor/bin/sail up -d
+```
+
+### Generate a new application key
+
+```bash
+sail artisan key:generate
+```
+
+### Install dependencies
+
+```bash
+docker run --rm \
+    -u "$(id -u):$(id -g)" \
+    -v "$(pwd):/var/www/html" \
+    -w /var/www/html \
+    laravelsail/php82-composer:latest \
+    composer install --ignore-platform-reqs
+sail artisan telescope:install
+```
+
+### Run the database migrations (Set the database connection in .env before migrating)
+
+```bash
+sail artisan migrate
+```
+
+### Build assets
+
+```bash
+sail npm install
+sail npm run build
+```
+
+### Run the test suite
+
+```bash
+sail artisan test
+```

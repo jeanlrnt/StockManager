@@ -8,16 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use LaravelArchivable\Archivable;
 
 class Provider extends Model
 {
-    use HasFactory, HasUuids, HasTimestamps;
+    use HasFactory, HasUuids, HasTimestamps, SoftDeletes, Archivable;
+
+    protected $table = 'providers';
+    protected $with = ['address'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'archived_at'];
 
     protected $fillable = [
         'name',
         'email',
-        'phone',
-        'address_id',
+        'phone'
     ];
 
     /**

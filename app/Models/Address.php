@@ -13,10 +13,9 @@ class Address extends Model
     use HasFactory, HasUuids, HasTimestamps;
 
     protected $table = 'address';
-    protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+    protected $hidden = ['created_at', 'updated_at', 'deleted_at', 'addressable_type', 'addressable_id'];
 
     protected $fillable = [
-        'id',
         'street',
         'street_complement',
         'city',

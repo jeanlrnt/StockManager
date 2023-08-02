@@ -31,7 +31,7 @@ class ProviderController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        [$data, $total_count, $total_pages, $page, $take] = paginate(Provider::all(), $request);
+        [$data, $links, $meta] = paginate(Provider::all(), $request);
 
         if ($data->isEmpty()) {
             return response()->json([
@@ -41,13 +41,8 @@ class ProviderController extends Controller
 
         $content = [
             'data' => $data->toArray(),
-            'total_elements' => $total_count,
-            'total_pages' => $total_pages,
-            'rendered_elements' => $data->count(),
-            'page' => (int)$page,
-            'take' => (int)$take,
-            'previous_page' => $page > 1 ? ($request->url() . '?page=' . ($page - 1) . '&take=' . $take) : null,
-            'next_page' => $page < $total_pages ? ($request->url() . '?page=' . ($page + 1) . '&take=' . $take) : null,
+            'links' => $links,
+            'meta' => $meta,
             'message' => 'Providers retrieved successfully',
         ];
 
@@ -162,7 +157,7 @@ class ProviderController extends Controller
         }
 
         // If the request is multipart/form-data, parse the parameters from the request
-        if ($request->all() === []) {
+        if ($request->is('multipart/form-data')) {
             $parameters = (object)MultipartFormDataParser::parse()?->params;
         } else {
             $parameters = (object)$request->all();

@@ -3,6 +3,6 @@
 return [
     'default' => [
         'page' => 1,
-        'take' => 20,
+        'limit' => 20,
     ],
 ];

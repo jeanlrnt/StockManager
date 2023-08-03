@@ -12,12 +12,12 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'id' => $this->faker->uuid(),
-            'first_name' => $this->faker->firstName(),
-            'last_name' => $this->faker->lastName(),
-            'company_name' => $this->faker->company(),
-            'email' => $this->faker->email(),
-            'phone' => $this->faker->phoneNumber()
+            'id' => $this->faker->uuid,
+            'first_name' => $this->faker->firstName,
+            'last_name' => $this->faker->lastName,
+            'company_name' => $this->faker->company,
+            'email' => $this->faker->email,
+            'phone' => $this->faker->phoneNumber
         ];
     }
 }

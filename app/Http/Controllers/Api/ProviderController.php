@@ -43,7 +43,7 @@ class ProviderController extends Controller
             'data' => $data->toArray(),
             'links' => $links,
             'meta' => $meta,
-            'message' => 'Providers retrieved successfully',
+            'message' => 'Providers retrieved successfully.',
         ];
 
         return response()->json($content, Response::HTTP_OK)
@@ -105,7 +105,7 @@ class ProviderController extends Controller
     {
         $user = Auth::user();
         $real_provider = Provider::find($provider);
-        // If the provider doesn't exist, return a 404 (Not Found)
+        // If the article doesn't exist, return a 404 (Not Found)
         if (!$real_provider) {
             return response()->json([
                 'message' => 'Provider not found.',
@@ -157,7 +157,7 @@ class ProviderController extends Controller
         }
 
         // If the request is multipart/form-data, parse the parameters from the request
-        if ($request->is('multipart/form-data')) {
+        if ($request->all() === []) {
             $parameters = (object)MultipartFormDataParser::parse()?->params;
         } else {
             $parameters = (object)$request->all();
@@ -172,7 +172,7 @@ class ProviderController extends Controller
         // Parse the address parameters from the request and put them in an array to be validated
         $address = [];
         foreach ($parameters as $key => $parameter) {
-            if (preg_match('/^address\[(.*)\]$/', $key, $matches)) {
+            if (preg_match('/^address\[(.*)]$/', $key, $matches)) {
                 $address[$matches[1]] = $parameter;
                 unset($parameters->$key);
             }
@@ -247,8 +247,11 @@ class ProviderController extends Controller
 
     /**
      * Force delete the specified resource from storage.
+     * @param string $provider
+     * @return JsonResponse
      */
-    public function forceDelete(string $provider){
+    public function forceDelete(string $provider): JsonResponse
+    {
         $user = Auth::user();
         $real_provider = Provider::onlyTrashed()->find($provider);
 
@@ -310,7 +313,7 @@ class ProviderController extends Controller
 
         return response()->json($content, Response::HTTP_ACCEPTED)
             ->header('Access-Control-Allow-Origin', '*')
-            ->header('Access-Control-Allow-Methods', 'PATCH')
+            ->header('Access-Control-Allow-Methods', 'POST')
             ->header('Access-Control-Allow-Headers', 'Authorization, Accept');
     }
 }

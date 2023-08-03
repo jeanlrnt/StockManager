@@ -13,7 +13,7 @@ class CustomerControllerTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -30,7 +30,7 @@ class CustomerControllerTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();

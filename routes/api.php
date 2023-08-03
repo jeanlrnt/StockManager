@@ -37,3 +37,12 @@ Route::prefix('providers')->name('providers.')->group(function (){
     Route::post('/{provider}/restore', 'App\Http\Controllers\Api\ProviderController@restore')->name('restore');
 });
 
+Route::prefix('articles')->name('articles.')->group(function (){
+    Route::get('/', 'App\Http\Controllers\Api\ArticleController@index')->name('index');
+    Route::get('/{article}', 'App\Http\Controllers\Api\ArticleController@show')->name('show');
+    Route::post('/', 'App\Http\Controllers\Api\ArticleController@store')->name('store');
+    Route::put('/{article}', 'App\Http\Controllers\Api\ArticleController@update')->name('update');
+    Route::delete('/{article}', 'App\Http\Controllers\Api\ArticleController@destroy')->name('destroy');
+    Route::delete('/{article}/force-delete', 'App\Http\Controllers\Api\ArticleController@forceDelete')->name('force-delete');
+    Route::post('/{article}/restore', 'App\Http\Controllers\Api\ArticleController@restore')->name('restore');
+});

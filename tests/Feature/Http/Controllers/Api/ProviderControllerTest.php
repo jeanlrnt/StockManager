@@ -14,7 +14,7 @@ class ProviderControllerTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Provider::all()->each->delete();

@@ -12,7 +12,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tokenCan('viewAny');
+        return $user->tokenCan('view-any');
     }
 
     /**

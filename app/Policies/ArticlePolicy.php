@@ -12,7 +12,7 @@ class ArticlePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->tokenCan('viewAny');
+        return $user->tokenCan('view-any');
     }
 
     /**
@@ -60,6 +60,6 @@ class ArticlePolicy
      */
     public function forceDelete(User $user, Article $article): bool
     {
-        return $user->tokenCan('forceDelete');
+        return $user->tokenCan('force-delete');
     }
 }

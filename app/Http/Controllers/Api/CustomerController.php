@@ -176,7 +176,7 @@ class CustomerController extends Controller
         }
 
         // If the request is a multipart/form-data request, parse the parameters from the request
-        if ($request->is('multipart/form-data')) {
+        if ($request->all() === []) {
             $parameters = (object)MultipartFormDataParser::parse()?->params;
         } else {
             $parameters = (object)$request->all();
@@ -195,7 +195,7 @@ class CustomerController extends Controller
         // Parse the address parameters from the request and put them in an array to be validated
         $address = [];
         foreach ($parameters as $key => $parameter) {
-            if (preg_match('/^address\[(.*)\]$/', $key, $matches)) {
+            if (preg_match('/^address\[(.*)]$/', $key, $matches)) {
                 $address[$matches[1]] = $parameter;
                 unset($parameters->$key);
             }

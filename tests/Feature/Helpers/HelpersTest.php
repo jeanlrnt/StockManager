@@ -13,7 +13,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -29,7 +29,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -45,7 +45,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -61,7 +61,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -79,7 +79,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -100,7 +100,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -118,7 +118,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -142,7 +142,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -163,7 +163,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -204,7 +204,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -225,7 +225,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();
@@ -273,7 +273,7 @@ class HelpersTest extends TestCase
     {
         Sanctum::actingAs(
             User::factory()->create(),
-            ['viewAny']
+            ['view-any']
         );
 
         Customer::all()->each->delete();

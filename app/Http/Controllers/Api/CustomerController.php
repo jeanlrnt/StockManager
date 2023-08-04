@@ -182,7 +182,6 @@ class CustomerController extends Controller
             $parameters = (object)$request->all();
         }
 
-
         // Update the customer with the parameters from the request if they exist or with the customer's current values
         $realCustomer->update([
             'first_name' => $parameters->first_name ?? $realCustomer->first_name,
@@ -192,17 +191,9 @@ class CustomerController extends Controller
             'phone' => $parameters->phone ?? $realCustomer->phone,
         ]);
 
-        // Parse the address parameters from the request and put them in an array to be validated
-        $address = [];
-        foreach ($parameters as $key => $parameter) {
-            if (preg_match('/^address\[(.*)]$/', $key, $matches)) {
-                $address[$matches[1]] = $parameter;
-                unset($parameters->$key);
-            }
-        }
-        $parameters->address = $address;
+        $parameters->address = parse_address($parameters);
 
-        if ($address) {
+        if ($parameters->address) {
             // Validate the address parameters if they exist
             $validated_address = Validator::validate($parameters->address, [
                 'street' => 'nullable|string',

@@ -169,17 +169,9 @@ class ProviderController extends Controller
             'phone' => $parameters->phone ?? $real_provider->phone,
         ]);
 
-        // Parse the address parameters from the request and put them in an array to be validated
-        $address = [];
-        foreach ($parameters as $key => $parameter) {
-            if (preg_match('/^address\[(.*)]$/', $key, $matches)) {
-                $address[$matches[1]] = $parameter;
-                unset($parameters->$key);
-            }
-        }
-        $parameters->address = $address;
+        $parameters->address = parse_address($parameters);
 
-        if ($address) {
+        if ($parameters->address) {
             // Validate the address parameters if they exist
             $validated_address = Validator::validate($parameters->address, [
                 'street' => 'nullable|string',

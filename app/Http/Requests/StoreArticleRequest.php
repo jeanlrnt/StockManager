@@ -24,6 +24,7 @@ class StoreArticleRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:255',
+            'provider' => 'required|exists:providers,id',
         ];
     }
 }

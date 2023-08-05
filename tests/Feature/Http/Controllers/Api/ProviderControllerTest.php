@@ -187,6 +187,20 @@ class ProviderControllerTest extends TestCase
         $response->assertStatus(422);
     }
 
+    public function test_update_returns_400_status_code_when_no_data_sent(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['update']
+        );
+
+        $provider = Provider::factory()->create();
+
+        $response = $this->put('/api/providers/' . $provider->id, []);
+
+        $response->assertStatus(400);
+    }
+
     public function test_update_returns_404_status_code_when_provider_is_not_found(): void
     {
         Sanctum::actingAs(

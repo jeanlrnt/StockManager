@@ -175,6 +175,12 @@ class CustomerController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
+        if ($request->all() === [] && $request->getContent() === '') {
+            return response()->json([
+                'message' => 'No parameters were provided.'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
         // If the request is a multipart/form-data request, parse the parameters from the request
         if ($request->all() === []) {
             $parameters = (object)MultipartFormDataParser::parse()?->params;

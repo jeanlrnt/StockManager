@@ -24,6 +24,7 @@ class UpdateArticleRequest extends FormRequest
     {
         return [
             'title' => 'nullable|string|max:255',
+            'provider' => 'nullable|exists:providers,id',
         ];
     }
 }

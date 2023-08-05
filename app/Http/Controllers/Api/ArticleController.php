@@ -68,11 +68,9 @@ class ArticleController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $article = Article::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'provider' => $request->provider_id,
-        ]);
+        $article = new Article($request->validated());
+        $article->slug = Str::slug($article->title);
+        $article->save();
 
         $data = Article::find($article->id);
         $content = [
@@ -110,7 +108,6 @@ class ArticleController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-
         $content = [
             'data' => $real_article->toArray(),
             'rendered_elements' => 1,
@@ -146,6 +143,12 @@ class ArticleController extends Controller
             return response()->json([
                 'message' => 'You are not authorized to update this article.'
             ], Response::HTTP_FORBIDDEN);
+        }
+
+        if ($request->all() === [] && $request->getContent() === '') {
+            return response()->json([
+                'message' => 'No parameters were provided.'
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         // If the request is multipart/form-data, parse the parameters from the request

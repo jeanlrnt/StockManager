@@ -26,7 +26,7 @@ class CustomerControllerTest extends TestCase
         $response->assertJsonCount(5, 'data');
     }
 
-    public function test_index_returns_404_status_code_when_user_is_authorized_and_there_are_no_customers(): void
+    public function test_index_returns_404_status_code_when_there_are_no_customers(): void
     {
         Sanctum::actingAs(
             User::factory()->create(),
@@ -46,6 +46,10 @@ class CustomerControllerTest extends TestCase
             User::factory()->create(),
             ['missing-permission']
         );
+
+        Customer::all()->each->delete();
+
+        Customer::factory()->count(5)->create();
 
         $response = $this->get('/api/customers');
 
@@ -206,6 +210,20 @@ class CustomerControllerTest extends TestCase
         $response = $this->put('/api/customers/' . $customer->id, ['email' => 'invalid-email']);
 
         $response->assertStatus(422);
+    }
+
+    public function test_update_returns_400_status_code_when_no_data_sent(): void
+    {
+        Sanctum::actingAs(
+            User::factory()->create(),
+            ['update']
+        );
+
+        $customer = Customer::factory()->create();
+
+        $response = $this->put('/api/customers/' . $customer->id, []);
+
+        $response->assertStatus(400);
     }
 
     public function test_update_returns_403_status_code_when_user_is_not_authorized(): void

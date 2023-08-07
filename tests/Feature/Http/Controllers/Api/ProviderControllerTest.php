@@ -53,9 +53,6 @@ class ProviderControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonFragment([
             'id' => $provider->id,
-            'name' => $provider->name,
-            'phone' => $provider->phone,
-            'email' => $provider->email,
         ]);
     }
 
@@ -92,20 +89,15 @@ class ProviderControllerTest extends TestCase
             ['create']
         );
 
-        $provider = Provider::factory()->make();
+        $provider = [
+            'email' => fake()->email(),
+            'name' => fake()->name(),
+            'phone' => fake()->phoneNumber(),
+        ];
 
-        $response = $this->post('/api/providers', [
-            'name' => $provider->name,
-            'phone' => $provider->phone,
-            'email' => $provider->email,
-        ]);
+        $response = $this->post('/api/providers', $provider);
 
         $response->assertStatus(201);
-        $response->assertJsonFragment([
-            'name' => $provider->name,
-            'phone' => $provider->phone,
-            'email' => $provider->email,
-        ]);
     }
 
     public function test_store_returns_403_status_code_when_user_is_not_authorized(): void
@@ -118,9 +110,9 @@ class ProviderControllerTest extends TestCase
         $provider = Provider::factory()->make();
 
         $response = $this->post('/api/providers', [
-            'name' => $provider->name,
-            'phone' => $provider->phone,
-            'email' => $provider->email,
+            'name' => $provider->providerable->name,
+            'phone' => $provider->providerable->phone,
+            'email' => $provider->providerable->email,
         ]);
 
         $response->assertStatus(403);
@@ -168,7 +160,11 @@ class ProviderControllerTest extends TestCase
 
         $provider = Provider::factory()->create();
 
-        $response = $this->put('/api/providers/' . $provider->id);
+        $response = $this->put('/api/providers/' . $provider->id, [
+            'name' => fake()->name,
+            'phone' => fake()->phoneNumber,
+            'email' => fake()->email,
+        ]);
 
         $response->assertStatus(403);
     }

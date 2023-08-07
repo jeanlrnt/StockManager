@@ -175,10 +175,6 @@ class HelpersTest extends TestCase
             'data' => [
                 '*' => [
                     'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone',
                 ]
             ],
             'links' => [

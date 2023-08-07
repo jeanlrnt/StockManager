@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProviderRequest;
 use App\Http\Requests\UpdateProviderRequest;
+use App\Models\Company;
 use App\Models\Provider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -68,7 +69,10 @@ class ProviderController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
-        $provider = Provider::create($request->validated());
+        $providerable = new Company($request->validated());
+
+        $provider = Provider::create();
+        $provider->providerable()->associate($providerable);
 
         if ($request->has('address')) {
             // Validate the address parameters if they exist and if they're valid
@@ -80,7 +84,7 @@ class ProviderController extends Controller
                 'country' => 'required|string',
             ]);
 
-            $provider->address()->create($validated_address);
+            $provider->providerable()->address()->create($validated_address);
         }
 
         $data = Provider::find($provider->id);
@@ -169,10 +173,10 @@ class ProviderController extends Controller
             $parameters = (object)$request->all();
         }
 
-        $real_provider->update([
-            'name' => $parameters->name ?? $real_provider->name,
-            'email' => $parameters->email ?? $real_provider->email,
-            'phone' => $parameters->phone ?? $real_provider->phone,
+        $real_provider->providerable()->update([
+            'name' => $parameters->name ?? $real_provider->providerable->name,
+            'email' => $parameters->email ?? $real_provider->providerable->email,
+            'phone' => $parameters->phone ?? $real_provider->providerable->phone,
         ]);
 
         $parameters->address = parse_address($parameters);
@@ -188,11 +192,11 @@ class ProviderController extends Controller
             ]);
 
             // If the provider doesn't have an address, create one
-            if (!$real_provider->address) {
-                $real_provider->address()->create($validated_address);
+            if (!$real_provider->providerable()->address) {
+                $real_provider->providerable()->address()->create($validated_address);
             } else {
                 // Otherwise, update the existing address
-                $real_provider->address->update($validated_address);
+                $real_provider->providerable()->address()->update($validated_address);
             }
         }
 

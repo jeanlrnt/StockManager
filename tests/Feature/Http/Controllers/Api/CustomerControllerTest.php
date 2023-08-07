@@ -83,11 +83,6 @@ class CustomerControllerTest extends TestCase
 
         $response->assertJsonFragment([
             'id' => $customer->id,
-            'first_name' => $customer->first_name,
-            'last_name' => $customer->last_name,
-            'company_name' => $customer->company_name,
-            'email' => $customer->email,
-            'phone' => $customer->phone
         ]);
     }
 
@@ -128,7 +123,6 @@ class CustomerControllerTest extends TestCase
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->email(),
-            'company_name' => fake()->company(),
             'phone' => fake()->phoneNumber(),
             'address[street]' => fake()->streetAddress(),
             'address[street_complement]' => fake()->streetSuffix(),
@@ -188,14 +182,27 @@ class CustomerControllerTest extends TestCase
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'email' => fake()->email(),
-            'company_name' => fake()->company(),
             'phone' => fake()->phoneNumber()
         ];
 
         $response = $this->put('/api/customers/' . $customer->id, $newCustomer);
 
         $response->assertStatus(202);
-        $response->assertJsonFragment($newCustomer);
+        $response->assertJsonFragment([
+            'id' => $customer->id,
+            'customerable_type' => $customer->customerable->getMorphClass(),
+            'customerable_id' => $customer->customerable->id,
+            'customerable' => [
+                'id' => $customer->customerable->id,
+                'first_name' => $newCustomer['first_name'],
+                'last_name' => $newCustomer['last_name'],
+                'email' => $newCustomer['email'],
+                'phone' => $newCustomer['phone'],
+                'date_of_birth' => $customer->customerable->date_of_birth,
+                'gender' => $customer->customerable->gender,
+                'address' => $customer->customerable->address,
+            ]
+        ]);
     }
 
     public function test_update_returns_422_status_code_when_validation_fails(): void

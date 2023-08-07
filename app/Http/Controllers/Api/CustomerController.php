@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\storeCustomerRequest;
 use App\Http\Requests\updateCustomerRequest;
 use App\Models\Address;
+use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Person;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Notihnio\MultipartFormDataParser\MultipartFormDataParser;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -69,14 +70,30 @@ class CustomerController extends Controller
             ], Response::HTTP_FORBIDDEN);
         }
 
+        if ($request->has('first_name')) {
+            $customerable = new Person([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email ?? null,
+                'phone' => $request->phone ?? null,
+                'date_of_birth' => $request->date_of_birth ?? null,
+                'gender' => $request->gender ?? null,
+            ]);
+        } else {
+            $customerable = new Company([
+                'name' => $request->name,
+                'email' => $request->email ?? null,
+                'phone' => $request->phone ?? null,
+                'website' => $request->website ?? null,
+                'industry' => $request->industry ?? null,
+                'number_of_employees' => $request->number_of_employees ?? null,
+                'annual_revenue' => $request->annual_revenue ?? null,
+                'description' => $request->description ?? null,
+            ]);
+        }
         // Create the customer with the parameters from the request if they exist or with null values
-        $customer = Customer::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'company_name' => $request->company_name ?? null,
-            'email' => $request->email,
-            'phone' => $request->phone ?? null,
-        ]);
+        $customer = Customer::create();
+        $customer->customerable()->associate($customerable);
 
         // If the request has an address, create it and link it to the customer if it's valid and if it exists
         if ($request->has('address')) {
@@ -90,7 +107,6 @@ class CustomerController extends Controller
             ]);
             // Create the address and link it to the customer if the validation was successful
             $address = Address::create([
-                'id' => Str::uuid(),
                 'street' => $request->address['street'] ?? null,
                 'street_complement' => $request->address['street_complement'] ?? null,
                 'city' => $request->address['city'] ?? null,
@@ -100,7 +116,7 @@ class CustomerController extends Controller
                 'addressable_type' => Customer::class,
             ]);
 
-            $customer->address()->save($address);
+            $customer->customerable()->address()->save($address);
         }
 
         // Get the created customer from the database and return it as JSON if the creation was successful (201)
@@ -189,13 +205,20 @@ class CustomerController extends Controller
         }
 
         // Update the customer with the parameters from the request if they exist or with the customer's current values
-        $realCustomer->update([
-            'first_name' => $parameters->first_name ?? $realCustomer->first_name,
-            'last_name' => $parameters->last_name ?? $realCustomer->last_name,
-            'company_name' => $parameters->company_name ?? $realCustomer->company_name,
-            'email' => $parameters->email ?? $realCustomer->email,
-            'phone' => $parameters->phone ?? $realCustomer->phone,
-        ]);
+        if ($realCustomer->customerable_type == 'App\Models\Person') {
+            $realCustomer->customerable()->update([
+                'first_name' => $parameters->first_name ?? $realCustomer->customerable->first_name,
+                'last_name' => $parameters->last_name ?? $realCustomer->customerable->last_name,
+                'email' => $parameters->email ?? $realCustomer->customerable->email,
+                'phone' => $parameters->phone ?? $realCustomer->customerable->phone,
+            ]);
+        } else if ($realCustomer->customerable_type == 'App\Models\Company') {
+            $realCustomer->customerable()->update([
+                'name' => $parameters->name ?? $realCustomer->customerable->name,
+                'email' => $parameters->email ?? $realCustomer->customerable->email,
+                'phone' => $parameters->phone ?? $realCustomer->customerable->phone,
+            ]);
+        }
 
         $parameters->address = parse_address($parameters);
 
@@ -210,11 +233,11 @@ class CustomerController extends Controller
             ]);
 
             // If the customer doesn't have an address, create it and link it to the customer
-            if (!$realCustomer->address) {
-                $realCustomer->address()->create($validated_address);
+            if (!$realCustomer->customerable()->address()) {
+                $realCustomer->customerable()->address()->create($validated_address);
             } else {
                 // If the customer already has an address, update it with the validated address parameters
-                $realCustomer->address->update($validated_address);
+                $realCustomer->customerable()->address()->update($validated_address);
             }
         }
 

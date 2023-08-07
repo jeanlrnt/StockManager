@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Customer;
+use App\Models\Person;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CustomerFactory extends Factory
@@ -11,13 +12,10 @@ class CustomerFactory extends Factory
 
     public function definition(): array
     {
+        $customerable = Person::factory()->create();
         return [
-            'id' => $this->faker->uuid,
-            'first_name' => $this->faker->firstName,
-            'last_name' => $this->faker->lastName,
-            'company_name' => $this->faker->company,
-            'email' => $this->faker->email,
-            'phone' => $this->faker->phoneNumber
+            'customerable_id' => $customerable->id,
+            'customerable_type' => $customerable->getMorphClass(),
         ];
     }
 }

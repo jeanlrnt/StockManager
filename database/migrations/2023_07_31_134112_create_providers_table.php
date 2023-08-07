@@ -12,9 +12,7 @@ return new class extends Migration {
     {
         Schema::create('providers', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
-            $table->string('email')->nullable();
-            $table->string('phone')->nullable();
+            $table->nullableUuidMorphs('providerable');
             $table->timestamps();
             $table->archivedAt();
             $table->softDeletes();

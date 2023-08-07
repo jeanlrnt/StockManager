@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
+use App\Models\Company;
 use App\Models\Provider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,10 +19,11 @@ class ProviderFactory extends Factory
      */
     public function definition(): array
     {
+        $providerable = Company::factory()->create();
+        $providerable->address()->create(Address::factory()->make()->toArray());
         return [
-            'name' => $this->faker->name,
-            'phone' => $this->faker->phoneNumber,
-            'email' => $this->faker->email,
+            'providerable_id' => $providerable->id,
+            'providerable_type' => $providerable->getMorphClass(),
         ];
     }
 }

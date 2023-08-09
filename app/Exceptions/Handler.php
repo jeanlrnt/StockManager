@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,13 +27,13 @@ class Handler extends ExceptionHandler
     {
         $this->renderable(function (AuthenticationException $e, $request) {
             if ($request->is('api/*')) {
-                return response()->json(['message' => 'Unauthenticated.'], 401);
+                return response()->json(['message' => 'The request is unauthorized. Please use a valid token.'], 401);
             }
             return redirect()->guest(route('login'));
         });
 
         $this->reportable(function (Throwable $e) {
-            \Log::debug($e->getMessage());
+            Log::debug($e->getMessage());
         });
     }
 }
